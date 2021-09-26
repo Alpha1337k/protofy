@@ -78,6 +78,7 @@ export class HeaderController {
 
 	updateHeader(data : ProtoStruct[])
 	{
+		this.readFile();
 		for (let i = 0; i < data.length; i++) {
 			const e = data[i];
 			let x;
