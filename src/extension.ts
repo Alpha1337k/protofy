@@ -2,6 +2,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import { glob, GlobSync } from 'glob';
+import { performance } from 'perf_hooks';
 import * as vscode from 'vscode';
 import { ProtoFinder } from './find';
 import { HeaderController } from './header';
@@ -23,7 +24,7 @@ function getRoot(uri:string) : undefined | string {
 	return undefined;
 }
 
-function updateFile(text: string, uri :string) {
+async function updateFile(text: string, uri :string) {
 	//console.log("--------------------");
 	const root = getRoot(uri);
 
@@ -63,7 +64,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	disposables.push(vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
 		if (document.languageId === "c" && document.uri.scheme === "file" && isEnabled) {
-			updateFile(document.getText(), document.uri.path);
+			let startTime = performance.now();
+			updateFile(document.getText(), document.uri.path).then(() => {
+				let endTime = performance.now();
+				console.log(`time wasted: ${endTime - startTime}ms`);
+			});
 		}
 	}));
 
