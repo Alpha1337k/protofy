@@ -6,6 +6,7 @@ import { performance } from 'perf_hooks';
 import * as vscode from 'vscode';
 import { ProtoFinder } from './find';
 import { HeaderController } from './header';
+import { getHeaderRange } from './highlight';
 
 const		headerMap	: Map<string, HeaderController> = new Map<string, HeaderController>();
 const		finder		: ProtoFinder	= new ProtoFinder();
@@ -25,7 +26,7 @@ function getRoot(uri:string) : undefined | string {
 }
 
 async function updateFile(text: string, uri :string) {
-	//console.log("--------------------");
+	console.log("--------------------");
 	const root = getRoot(uri);
 
 	if (root === undefined)
@@ -48,6 +49,26 @@ async function updateFile(text: string, uri :string) {
 	}
 }
 
+async function updateHighlight(e: vscode.TextEditor | undefined) {
+	if (e === undefined)
+		return;
+	vscode.workspace.findFiles('**/*.h', '', undefined).then((files: vscode.Uri[]) => {
+		let decors = [];
+		const decor = getHeaderRange(e.document, files);
+		console.log(decor);
+		if (decor === undefined)
+			return;
+		decors.push(decor);
+		e.setDecorations(notifyDecoration, decors);
+	});
+}
+
+const notifyDecoration = vscode.window.createTextEditorDecorationType({
+	overviewRulerColor: 'rgba(0, 255, 0, 0.2)',
+	overviewRulerLane: vscode.OverviewRulerLane.Right,
+	backgroundColor: 'rgba(0,255,0,0.2)',
+});
+
 export function activate(context: vscode.ExtensionContext) {
 
 	let disposables: vscode.Disposable[] = [];
@@ -62,9 +83,18 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Protofy is disabled!');
 	}));
 
+	disposables.push(vscode.window.onDidChangeActiveTextEditor((e : vscode.TextEditor | undefined) => {
+		console.log("xdddd", e, e?.document.languageId, e?.document.uri.scheme);
+		if (e === undefined || e.document.languageId !== 'c' || e.document.uri.scheme !== "file" || !isEnabled)
+			return;
+		updateHighlight(e);
+	}));
+
 	disposables.push(vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
 		if (document.languageId === "c" && document.uri.scheme === "file" && isEnabled) {
 			let startTime = performance.now();
+			console.log("ok", vscode.window.activeTextEditor);
+			updateHighlight(vscode.window.activeTextEditor);
 			updateFile(document.getText(), document.uri.path).then(() => {
 				let endTime = performance.now();
 				console.log(`time wasted: ${endTime - startTime}ms`);
