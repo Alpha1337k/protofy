@@ -20,7 +20,7 @@ export class ProtoFinder {
     getPrototypes(text: string) : ProtoStruct[]
 	{
 		let rval : ProtoStruct[]	= [];
-		let regx : RegExp			= /([\w_]+)([\s*]+)([\w_\d]+)\(([\w\s\d*_,]+)\)/g;
+		let regx : RegExp			= /([\w_]+)\s+([*]+)([\w_\d]+)\(([\w\s\d*_,]+)\)/g;
 
 		let match;
 		while ((match = regx.exec(text)) !== null) {
