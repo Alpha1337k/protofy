@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import { ProtoFinder } from './find';
 import { HeaderController } from './header';
 import { getHeaderRange } from './highlight';
+import { Stale } from './stale';
 
 const		headerMap	: Map<string, HeaderController> = new Map<string, HeaderController>();
 const		finder		: ProtoFinder	= new ProtoFinder();
@@ -83,6 +84,14 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Protofy is disabled!');
 	}));
 
+	disposables.push(vscode.commands.registerCommand("protofy.clearStale", () => {
+		let s : Stale = new Stale();
+		
+		s.clearstale(headerMap).then((count : number) => {
+			vscode.window.showInformationMessage(`Protofy removed ${count} prototypes!`);
+		});
+	}));
+
 	disposables.push(vscode.window.onDidChangeActiveTextEditor((e : vscode.TextEditor | undefined) => {
 		console.log("xdddd", e, e?.document.languageId, e?.document.uri.scheme);
 		if (e === undefined || e.document.languageId !== 'c' || e.document.uri.scheme !== "file" || !isEnabled)
@@ -102,9 +111,20 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	}));
 
+	vscode.workspace.findFiles("**/*.h", '').then((headers: vscode.Uri[]) => {
+		for (let i = 0; i < headers.length; i++) {
+			const e = headers[i];
+			//console.log("Path::",e.path, headerMap.get(e.path));
+			if (headerMap.get(e.path) === undefined)
+			{
+				headerMap.set(e.path, new HeaderController(e.path));
+			}
+			console.log("header len: ", headerMap.size);
+		}
+	});
+
 	for (let i = 0; i < disposables.length; i++) {
 		const e = disposables[i];
-		
 		context.subscriptions.push(e);
 	}
 }

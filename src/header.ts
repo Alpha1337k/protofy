@@ -59,7 +59,7 @@ export class HeaderController {
 	readHeader()
 	{
 		let rval :	DetailedProt[]	= [];
-		let regx :	RegExp			= /([\w_]+)([\s*]+)([\w_\d]+)\(([\w\s\d*_,]+)\);/;
+		let regx :	RegExp			= /([\w_]+)\s+([*]+)([\w_\d]+)\(([\w\s\d*_,]+)\);/;
 
 		let match;
 		for (let i = 0; i < this.file.length; i++) {
@@ -73,8 +73,8 @@ export class HeaderController {
 			}
 		}
 		this.prot = rval;
+		return rval;
 	}
-
 
 	updateHeader(data : ProtoStruct[])
 	{
@@ -101,6 +101,26 @@ export class HeaderController {
 		this.saveFile();
 	}
 
+	cleanStaleHeader(prototypes: ProtoStruct[]) : number
+	{
+		console.log(`cleaning ${this.filename}`);
+		let rval :	number = 0;
+		this.readFile();
+		console.log(JSON.stringify(prototypes));
+
+		for (let i = 0; i < this.prot.length; i++)
+		{
+			if (prototypes.find(x => JSON.stringify(x) === JSON.stringify(this.prot[i].p)) === undefined)
+			{
+				console.log("not found ",  JSON.stringify(this.prot[i].p));
+				this.file.splice(this.prot[i].start, 1);
+				rval += 1;
+			}
+		}
+		this.saveFile();
+		return (rval);
+	}
+
 	createPrototype(item : ProtoStruct): string
 	{
 		return (item.rType + "\t\t" + item.rPtr + item.name + "(" + item.args + ");");
@@ -119,6 +139,5 @@ export class HeaderController {
 	saveFile()
 	{
 		writeFileSync(this.filepath, this.file.join('\n'));
-		this.readFile();
 	}
 }

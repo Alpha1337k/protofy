@@ -22,12 +22,16 @@
 	"contributes": {
 		"commands": [
 			{
+				"command": "protofy.clearStale",
+				"title": "Protofy: clear stale prototypes"
+			},
+			{
 				"command": "protofy.enableProtofy",
-				"title": "Enable Protofy"
+				"title": "Protofy: enable"
 			},
 			{
 				"command": "protofy.disableProtofy",
-				"title": "Disable Protofy"
+				"title": "Protofy: disable"
 			}
 		]
 	},
