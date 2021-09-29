@@ -1,12 +1,11 @@
-import * as vscode from 'vscode';
-
+import * as vscode	from 'vscode';
+import { cIncludeRegX } from "./regex";
 
 export function getHeaderRange(document: vscode.TextDocument, files : vscode.Uri[]) {
-	const regx : RegExp	= /#\s*include\s+[<"]([A-z_.0-9_]+)[>"]/;
 
 	for (let i = 0; i < document.lineCount; i++) {
 		const element = document.lineAt(i);
-		let match = element.text.match(regx);
+		let match = element.text.match(cIncludeRegX);
 		if (match !== null)
 		{
 			if (files.find(x => x.path.endsWith(match![1])))

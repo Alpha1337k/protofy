@@ -1,4 +1,5 @@
 import { glob, GlobSync } from 'glob';
+import { cSourceRegX, cIncludeRegX } from "./regex";
 
 
 export class ProtoStruct {
@@ -20,7 +21,7 @@ export class ProtoFinder {
     getPrototypes(text: string) : ProtoStruct[]
 	{
 		let rval : ProtoStruct[]	= [];
-		let regx : RegExp			= /([\w_]+)\s+([*]+)([\w_\d]+)\(([\w\s\d*_,]+)\)/g;
+		let regx : RegExp			= cSourceRegX;
 
 		let match;
 		while ((match = regx.exec(text)) !== null) {
@@ -36,7 +37,7 @@ export class ProtoFinder {
 	{
 		if (workspaceUrl === undefined)
 			return "";
-		let regx : RegExp	= /#\s*include\s+[<"]([A-z_.0-9_]+)[>"]/g;
+		let regx : RegExp	= cIncludeRegX;
 		let headerUri : string[] = glob.sync(workspaceUrl + "/**/*.h");
 	
 		let match : any;

@@ -2,6 +2,7 @@
 import { ProtoStruct } from "./find";
 import * as vscode from 'vscode';
 import { readFileSync, writeFileSync } from "fs";
+import { cHeaderRegX } from "./regex";
 
 interface DetailedProt {
     p: ProtoStruct;
@@ -59,7 +60,7 @@ export class HeaderController {
 	readHeader()
 	{
 		let rval :	DetailedProt[]	= [];
-		let regx :	RegExp			= /([\w_]+)\s+([*]+)([\w_\d]+)\(([\w\s\d*_,]+)\);/;
+		let regx :	RegExp			= cHeaderRegX;
 
 		let match;
 		for (let i = 0; i < this.file.length; i++) {
