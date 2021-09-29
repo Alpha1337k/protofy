@@ -17,6 +17,7 @@
 			}
 		},
 		{
+			"label": "webpack-build",
 			"type": "npm",
 			"script": "vscode:prepublish",
 			"problemMatcher": []
