@@ -3,9 +3,11 @@ import { cIncludeRegX } from "./regex";
 
 export function getHeaderRange(document: vscode.TextDocument, files : vscode.Uri[]) {
 
+	let regx : RegExp	= cIncludeRegX;
+
 	for (let i = 0; i < document.lineCount; i++) {
 		const element = document.lineAt(i);
-		let match = element.text.match(cIncludeRegX);
+		let match = regx.exec(element.text);
 		if (match !== null)
 		{
 			if (files.find(x => x.path.endsWith(match![1])))

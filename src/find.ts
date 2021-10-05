@@ -1,4 +1,5 @@
 import { glob, GlobSync } from 'glob';
+import { HeaderController } from './header';
 import { cSourceRegX, cIncludeRegX } from "./regex";
 
 
@@ -25,26 +26,31 @@ export class ProtoFinder {
 
 		let match;
 		while ((match = regx.exec(text)) !== null) {
-			match[2] = match[2].replace('\s', '');
-			match[2] = match[2].replace('\t', '');
 			rval.push(new ProtoStruct(match[3], match[1], match[2], match[4].split(',')));
 		}
 
 		return rval;
 	}
 
-	getHeader(text: string, workspaceUrl: string | undefined) : string
+	getHeader(text: string, workspaceUrl: string | undefined, headers : Map<string, HeaderController>) : string
 	{
 		if (workspaceUrl === undefined)
 			return "";
 		let regx : RegExp	= cIncludeRegX;
-		let headerUri : string[] = glob.sync(workspaceUrl + "/**/*.h");
 	
 		let match : any;
+		let rval : any;
+		console.log("length", headers.size);
 		while ((match = regx.exec(text)) !== null) {
-			const rval = headerUri.find(x => x.match(match[1] === null ? '' : match[1]) !== null);
-			if (rval !== undefined)
-				return rval;
+
+			for (const [key, value] of headers)
+			{
+				if (key.endsWith(match[1]))
+				{
+					console.log("mets!!!");
+					return key;
+				}
+			}
 		}
 		return '';
 	}

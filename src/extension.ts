@@ -36,7 +36,9 @@ async function updateFile(text: string, uri :string) {
 	}
 	else
 	{
-		const path = finder.getHeader(text, root);
+		const path = finder.getHeader(text, root, headerMap);
+		
+		console.log("Path: ", path);
 		if (path === "")
 		{
 			vscode.window.showErrorMessage("Cant find header, no prototypes added");
@@ -56,9 +58,11 @@ async function updateHighlight(e: vscode.TextEditor | undefined) {
 	vscode.workspace.findFiles('**/*.h', '', undefined).then((files: vscode.Uri[]) => {
 		let decors = [];
 		const decor = getHeaderRange(e.document, files);
-		console.log(decor);
 		if (decor === undefined)
+		{
+			console.log("header not found for highlighting");
 			return;
+		}
 		decors.push(decor);
 		e.setDecorations(notifyDecoration, decors);
 	});
@@ -93,20 +97,22 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	disposables.push(vscode.window.onDidChangeActiveTextEditor((e : vscode.TextEditor | undefined) => {
-		console.log("xdddd", e, e?.document.languageId, e?.document.uri.scheme);
-		if (e === undefined || e.document.languageId !== 'c' || e.document.uri.scheme !== "file" || !isEnabled)
+		console.log("changed editor", e, e?.document.languageId, e?.document.uri.scheme, isEnabled);
+		if (e === undefined || e.document.languageId !== 'c' || e.document.uri.scheme !== "file" || isEnabled === false)
 			return;
 		updateHighlight(e);
 	}));
 
 	disposables.push(vscode.workspace.onDidSaveTextDocument((document: vscode.TextDocument) => {
-		if (document.languageId === "c" && document.uri.scheme === "file" && isEnabled) {
+		if (document.languageId === "c" && document.uri.scheme === "file" && isEnabled)
+		{
 			let startTime = performance.now();
-			console.log("ok", vscode.window.activeTextEditor);
 			updateHighlight(vscode.window.activeTextEditor);
 			updateFile(document.getText(), document.uri.path).then(() => {
 				let endTime = performance.now();
 				console.log(`time wasted: ${endTime - startTime}ms`);
+			}).catch((err) => {
+				console.log("error! idk", err);
 			});
 		}
 	}));
@@ -114,7 +120,7 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.findFiles("**/*.h", '').then((headers: vscode.Uri[]) => {
 		for (let i = 0; i < headers.length; i++) {
 			const e = headers[i];
-			//console.log("Path::",e.path, headerMap.get(e.path));
+			console.log("Path::",e.path, headerMap.get(e.path));
 			if (headerMap.get(e.path) === undefined)
 			{
 				headerMap.set(e.path, new HeaderController(e.path));

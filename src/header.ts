@@ -68,8 +68,6 @@ export class HeaderController {
 			match = regx.exec(e);
 			if (match !== null && match !== undefined)
 			{
-				match[2] = match[2].replace('\s', '');
-				match[2] = match[2].replace('\t', '');
 				rval.push({p: new ProtoStruct(match[3], match[1], match[2], match[4].split(',')), start: i});	
 			}
 		}
@@ -80,6 +78,7 @@ export class HeaderController {
 	updateHeader(data : ProtoStruct[])
 	{
 		this.readFile();
+		console.log("dtat", data);
 		for (let i = 0; i < data.length; i++) {
 			const e = data[i];
 			let x;
